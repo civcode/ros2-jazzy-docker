@@ -5,6 +5,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 ARG UID
 ARG GID
+ARG USERNAME
 
 # Install packages
 RUN apt-get update && apt-get install -y \
@@ -26,6 +27,7 @@ RUN apt-get update && apt-get install -y \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
+
 # Install OMPL (Open Motion Planning Library)
 RUN mkdir -p /var/ompl \
     && cd /var/ompl \
@@ -44,14 +46,28 @@ RUN add-apt-repository universe \
     && apt-get update && apt-get install -y \ 
     ros-dev-tools \
     ros-jazzy-desktop
- 
+
 # Create a non-root user with sudo privileges
-RUN adduser --disabled-password --gecos "" farmlab \
-    && usermod -aG sudo farmlab \
-    && echo 'farmlab ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers 
+# RUN adduser --disabled-password --gecos "" farmlab \
+#     && usermod -aG sudo farmlab \
+#     && echo 'farmlab ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers 
+
+# Remove any user or group that conflicts with the desired UID/GID
+RUN if getent passwd $UID; then \
+      userdel -f $(getent passwd $UID | cut -d: -f1); \
+    fi \
+    && if getent group $GID; then \
+      groupdel $(getent group $GID | cut -d: -f1); \
+    fi
+    
+# Create the user and group with the specified UID and GID    
+RUN addgroup --gid ${GID} ${USERNAME} \ 
+    && adduser --uid ${UID} --gid ${GID} --disabled-password --gecos "" ${USERNAME} \
+    && usermod -aG sudo ${USERNAME} \
+    && echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers 
 
 # Switch to the non-root user
-USER farmlab
+USER ${USERNAME}
 
 # Initialize rosdep
 RUN sudo rosdep init \
@@ -68,6 +84,8 @@ RUN echo "alias l='ls -1'" >> ~/.bashrc \
     && echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
     
 # Ensure .bashrc is sourced when a new shell session starts
-RUN echo 'source ~/.bashrc' >> ~/.bash_profile
+# RUN sudo echo 'source ~/.bashrc' >> ~/.bash_profile
+
+WORKDIR /home/${USERNAME}
 
 CMD ["sleep", "infinity"]
