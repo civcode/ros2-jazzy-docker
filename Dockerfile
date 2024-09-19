@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     htop \
+    iproute2 \
     locales \
     ncurses-dev \
     mesa-utils \
@@ -26,7 +27,6 @@ RUN apt-get update && apt-get install -y \
     vim \
     wget \
     && rm -rf /var/lib/apt/lists/*
-
 
 # Install OMPL (Open Motion Planning Library)
 RUN mkdir -p /var/ompl \
@@ -48,10 +48,6 @@ RUN add-apt-repository universe \
     ros-jazzy-desktop
 
 # Create a non-root user with sudo privileges
-# RUN adduser --disabled-password --gecos "" farmlab \
-#     && usermod -aG sudo farmlab \
-#     && echo 'farmlab ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers 
-
 # Remove any user or group that conflicts with the desired UID/GID
 RUN if getent passwd $UID; then \
       userdel -f $(getent passwd $UID | cut -d: -f1); \
@@ -74,18 +70,9 @@ RUN sudo rosdep init \
     && rosdep update
 
 # Modify .bashrc
-RUN echo "alias l='ls -1'" >> ~/.bashrc \
-    && echo "alias ll='ls -lah'" >> ~/.bashrc \
-    && echo "alias 'cd..'='cd ..'" >> ~/.bashrc \
-    && echo "alias tmux='tmux -2'" >> ~/.bashrc \
-    # make bash autocomplete write every suggestion in a separate line
-    && echo "bind 'set completion-display-width 0'" >> ~/.bashrc \
-    && echo "export LANG=en_US.UTF-8" >> ~/.bashrc \
-    && echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+COPY custom_bashrc /home/${USERNAME}/
+RUN cat /home/${USERNAME}/custom_bashrc >> /home/${USERNAME}/.bashrc
     
-# Ensure .bashrc is sourced when a new shell session starts
-# RUN sudo echo 'source ~/.bashrc' >> ~/.bash_profile
-
 WORKDIR /home/${USERNAME}
 
 CMD ["sleep", "infinity"]
