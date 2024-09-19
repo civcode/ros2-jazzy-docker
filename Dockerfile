@@ -71,7 +71,8 @@ RUN sudo rosdep init \
 
 # Modify .bashrc
 COPY custom_bashrc /home/${USERNAME}/
-RUN cat /home/${USERNAME}/custom_bashrc >> /home/${USERNAME}/.bashrc
+RUN cat /home/${USERNAME}/custom_bashrc >> /home/${USERNAME}/.bashrc \
+    && rm /home/${USERNAME}/custom_bashrc
     
 WORKDIR /home/${USERNAME}
 
