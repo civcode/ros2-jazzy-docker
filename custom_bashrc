@@ -13,7 +13,7 @@ bind 'set completion-display-width 0'
 export VISUAL=vim
 export EDITOR="$VISUAL"
 
-# ROS2 Humble
+# ROS2 Jazzy
 export LANG=en_US.UTF-8
 source /opt/ros/jazzy/setup.bash
 
