@@ -19,12 +19,12 @@ xhost +local:docker
 
 HOST_USER=${USER}
 
-  #  --user $HOST_UID:$HOST_GID \
+#  --user $HOST_UID:$HOST_GID \
 docker run -d -it \
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v /dev/dri/renderD128:/dev/dri/renderD128 \
-	-v /home/$USER/Downloads/Farmlab:/home/${HOST_USER}/Downloads/Farmlab \
+    -v /home/$USER/Downloads/Farmlab:/home/${HOST_USER}/Downloads/Farmlab \
     -v /home/$USER/workspace:/home/${HOST_USER}/workspace \
     --ipc host \
     ros2-jazzy
